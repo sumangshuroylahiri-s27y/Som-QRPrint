@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'motion/react';
 import { AppState, Step } from './types';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -8,7 +9,6 @@ import { WhatsAppGenerator } from './components/WhatsAppGenerator';
 import { QRGenerator } from './components/QRGenerator';
 import { DesignGallery } from './components/DesignGallery';
 import { LivePreview } from './components/LivePreview';
-import { Payment } from './components/Payment';
 import { Download } from './components/Download';
 
 const initialState: AppState = {
@@ -20,11 +20,6 @@ const initialState: AppState = {
     color: '#000000',
     ecl: 'H',
     logo: null,
-  },
-  qrConfig: {
-    x: 0,
-    y: 0,
-    size: 0,
   },
   paymentInfo: null
 };
@@ -82,17 +77,17 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-zinc-100 bg-black">
+    <div className="min-h-screen flex flex-col font-sans text-slate-100 bg-slate-950">
       {showResumeModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-zinc-900 border border-red-900/30 rounded-2xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+          <div className="bg-slate-900 border border-indigo-900/30 rounded-2xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-200">
             <h2 className="text-2xl font-bold text-white mb-2">Resume Design?</h2>
-            <p className="text-zinc-400 mb-8">You have a saved design in progress. Would you like to resume where you left off or start fresh?</p>
+            <p className="text-slate-400 mb-8">You have a saved design in progress. Would you like to resume where you left off or start fresh?</p>
             <div className="flex flex-col gap-3">
-              <button onClick={handleResume} className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition-colors">
+              <button onClick={handleResume} className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition-colors">
                 Resume Progress
               </button>
-              <button onClick={handleStartFresh} className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg font-bold transition-colors">
+              <button onClick={handleStartFresh} className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-bold transition-colors">
                 Start Fresh
               </button>
             </div>
@@ -102,14 +97,24 @@ export default function App() {
 
       <Header currentStep={appState.step} onNavigate={handleNavigate} onSaveProgress={handleSaveProgress} />
       
-      <main className="flex-grow flex flex-col">
-        {appState.step === 'home' && <Home onNavigate={handleNavigate} />}
-        {appState.step === 'whatsapp' && <WhatsAppGenerator appState={appState} setAppState={setAppState} onNavigate={handleNavigate} />}
-        {appState.step === 'qr' && <QRGenerator appState={appState} setAppState={setAppState} onNavigate={handleNavigate} />}
-        {appState.step === 'design' && <DesignGallery appState={appState} setAppState={setAppState} onNavigate={handleNavigate} />}
-        {appState.step === 'preview' && <LivePreview appState={appState} setAppState={setAppState} onNavigate={handleNavigate} />}
-        {appState.step === 'payment' && <Payment appState={appState} setAppState={setAppState} onNavigate={handleNavigate} />}
-        {appState.step === 'download' && <Download appState={appState} onNavigate={handleNavigate} resetApp={resetApp} />}
+      <main className="flex-grow flex flex-col relative overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={appState.step}
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="flex-grow flex flex-col w-full h-full"
+          >
+            {appState.step === 'home' && <Home onNavigate={handleNavigate} />}
+            {appState.step === 'whatsapp' && <WhatsAppGenerator appState={appState} setAppState={setAppState} onNavigate={handleNavigate} />}
+            {appState.step === 'qr' && <QRGenerator appState={appState} setAppState={setAppState} onNavigate={handleNavigate} />}
+            {appState.step === 'design' && <DesignGallery appState={appState} setAppState={setAppState} onNavigate={handleNavigate} />}
+            {appState.step === 'preview' && <LivePreview appState={appState} onNavigate={handleNavigate} />}
+            {appState.step === 'download' && <Download appState={appState} />}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <Footer />

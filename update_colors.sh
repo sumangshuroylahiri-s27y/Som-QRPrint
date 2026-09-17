@@ -1,0 +1,20 @@
+#!/bin/bash
+find src -type f -name "*.tsx" -o -name "*.ts" | while read -r file; do
+  sed -i 's/bg-black/bg-slate-950/g' "$file"
+  sed -i 's/bg-zinc-950/bg-slate-950/g' "$file"
+  sed -i 's/bg-zinc-900/bg-slate-900/g' "$file"
+  sed -i 's/bg-zinc-800/bg-slate-800/g' "$file"
+  sed -i 's/bg-zinc-700/bg-slate-700/g' "$file"
+  sed -i 's/bg-zinc-600/bg-slate-600/g' "$file"
+  sed -i 's/border-zinc-900/border-slate-900/g' "$file"
+  sed -i 's/border-zinc-800/border-slate-800/g' "$file"
+  sed -i 's/border-zinc-700/border-slate-700/g' "$file"
+  sed -i 's/text-zinc-/text-slate-/g' "$file"
+  sed -i 's/red-600/indigo-600/g' "$file"
+  sed -i 's/red-700/indigo-700/g' "$file"
+  sed -i 's/red-500/indigo-500/g' "$file"
+  sed -i 's/red-400/indigo-400/g' "$file"
+  sed -i 's/red-900/indigo-900/g' "$file"
+  sed -i 's/red-950/indigo-950/g' "$file"
+  sed -i 's/accent-red-/accent-indigo-/g' "$file"
+done

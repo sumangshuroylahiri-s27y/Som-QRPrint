@@ -12,7 +12,6 @@ export type Step =
   | 'qr'
   | 'design'
   | 'preview'
-  | 'payment'
   | 'download';
 
 export interface AppState {
@@ -24,11 +23,6 @@ export interface AppState {
     color: string;
     ecl: 'L' | 'M' | 'Q' | 'H';
     logo: string | null;
-  };
-  qrConfig: {
-    x: number;
-    y: number;
-    size: number;
   };
   paymentInfo: {
     utr: string;

@@ -6,14 +6,14 @@ export const CONFIG = {
   DESIGN_PRICE: 49,
 };
 
-// Replace these placeholders with actual design images in /public/assets/templates/
+// Precisely calculated coordinates matching the physical "Scan Me" white boxes
 export const TEMPLATES: Template[] = [
-  { id: '01', name: 'Business WhatsApp', image: '/assets/templates/design-01.png', defaultQrPosition: { x: 929, y: 1107 }, defaultQrSize: 617 },
-  { id: '02', name: 'Restaurant WhatsApp', image: '/assets/templates/design-02.png', defaultQrPosition: { x: 935, y: 1125 }, defaultQrSize: 608 },
-  { id: '03', name: 'Shop Contact', image: '/assets/templates/design-03.png', defaultQrPosition: { x: 1325, y: 2231 }, defaultQrSize: 684 },
-  { id: '04', name: 'Personal Contact', image: '/assets/templates/design-04.png', defaultQrPosition: { x: 938, y: 1111 }, defaultQrSize: 607 },
-  { id: '05', name: 'Customer Support', image: '/assets/templates/design-05.png', defaultQrPosition: { x: 910, y: 1117 }, defaultQrSize: 655 },
-  { id: '06', name: 'Payment / Contact', image: '/assets/templates/design-06.png', defaultQrPosition: { x: 837, y: 1205 }, defaultQrSize: 806 },
-  { id: '07', name: 'Service Enquiry', image: '/assets/templates/design-07.png', defaultQrPosition: { x: 868, y: 1188 }, defaultQrSize: 748 },
-  { id: '08', name: 'Appointment', image: '/assets/templates/design-08.png', defaultQrPosition: { x: 770, y: 1143 }, defaultQrSize: 877 },
+  { id: '01', name: 'Design 01', image: '/assets/templates/design-01.png', defaultQrPosition: { x: 956, y: 1123 }, defaultQrSize: 571 },
+  { id: '02', name: 'Design 02', image: '/assets/templates/design-02.png', defaultQrPosition: { x: 951, y: 1141 }, defaultQrSize: 574 },
+  { id: '03', name: 'Design 03', image: '/assets/templates/design-03.png', defaultQrPosition: { x: 949, y: 1170 }, defaultQrSize: 578 },
+  { id: '04', name: 'Design 04', image: '/assets/templates/design-04.png', defaultQrPosition: { x: 965, y: 1138 }, defaultQrSize: 563 },
+  { id: '05', name: 'Design 05', image: '/assets/templates/design-05.png', defaultQrPosition: { x: 926, y: 1133 }, defaultQrSize: 623 },
+  { id: '06', name: 'Design 06', image: '/assets/templates/design-06.png', defaultQrPosition: { x: 889, y: 1210 }, defaultQrSize: 703 },
+  { id: '07', name: 'Design 07', image: '/assets/templates/design-07.png', defaultQrPosition: { x: 915, y: 1202 }, defaultQrSize: 658 },
+  { id: '08', name: 'Design 08', image: '/assets/templates/design-08.png', defaultQrPosition: { x: 894, y: 1204 }, defaultQrSize: 691 },
 ];

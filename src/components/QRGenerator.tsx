@@ -109,20 +109,20 @@ export function QRGenerator({ appState, setAppState, onNavigate }: QRGeneratorPr
   };
 
   return (
-    <div className="flex-grow flex items-center justify-center p-4 py-12 bg-black">
+    <div className="flex-grow flex items-center justify-center p-4 py-12 bg-slate-950">
       <div className="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
         
         {/* Input Section */}
-        <div className="bg-zinc-900 rounded-2xl shadow-sm border border-zinc-800 overflow-hidden flex flex-col">
-          <div className="p-8 border-b border-zinc-800">
+        <div className="bg-slate-900 rounded-2xl shadow-sm border border-slate-800 overflow-hidden flex flex-col">
+          <div className="p-8 border-b border-slate-800">
             <h2 className="text-2xl font-bold text-white mb-2">Customize QR Code</h2>
-            <p className="text-zinc-400">Change appearance and verify live changes.</p>
+            <p className="text-slate-400">Change appearance and verify live changes.</p>
           </div>
           
           <div className="p-8 flex-grow">
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-2">WhatsApp Link</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">WhatsApp Link</label>
                 <input
                   type="url"
                   value={linkInput}
@@ -132,31 +132,31 @@ export function QRGenerator({ appState, setAppState, onNavigate }: QRGeneratorPr
                       generateQR(e.target.value, color, ecl, logoUrl);
                     }
                   }}
-                  className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent outline-none transition-all text-white"
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition-all text-white"
                   placeholder="https://wa.me/..."
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">QR Color</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">QR Color</label>
                   <div className="flex items-center gap-3">
                     <input
                       type="color"
                       value={color}
                       onChange={(e) => setColor(e.target.value)}
-                      className="w-12 h-12 p-1 bg-zinc-950 border border-zinc-800 rounded-lg cursor-pointer"
+                      className="w-12 h-12 p-1 bg-slate-950 border border-slate-800 rounded-lg cursor-pointer"
                     />
-                    <span className="text-sm text-zinc-500 font-mono uppercase">{color}</span>
+                    <span className="text-sm text-slate-500 font-mono uppercase">{color}</span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Error Correction</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Error Correction</label>
                   <select 
                     value={ecl}
                     onChange={(e) => setEcl(e.target.value as 'L'|'M'|'Q'|'H')}
-                    className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent outline-none transition-all text-white"
+                    className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-lg focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition-all text-white"
                   >
                     <option value="L">Low (7%)</option>
                     <option value="M">Medium (15%)</option>
@@ -167,18 +167,18 @@ export function QRGenerator({ appState, setAppState, onNavigate }: QRGeneratorPr
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-2">Center Logo</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Center Logo</label>
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-sm font-medium transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-medium transition-colors"
                   >
                     <Upload className="h-4 w-4" /> Upload Logo
                   </button>
                   {logoUrl && (
                     <button
                       onClick={() => setLogoUrl(null)}
-                      className="text-sm text-red-500 hover:text-red-400 font-medium"
+                      className="text-sm text-indigo-500 hover:text-indigo-400 font-medium"
                     >
                       Remove Logo
                     </button>
@@ -191,7 +191,7 @@ export function QRGenerator({ appState, setAppState, onNavigate }: QRGeneratorPr
                     className="hidden"
                   />
                 </div>
-                <p className="text-xs text-zinc-500 mt-2">Use 'High' error correction when adding a logo to ensure scannability.</p>
+                <p className="text-xs text-slate-500 mt-2">Use 'High' error correction when adding a logo to ensure scannability.</p>
               </div>
 
             </div>
@@ -199,12 +199,12 @@ export function QRGenerator({ appState, setAppState, onNavigate }: QRGeneratorPr
         </div>
 
         {/* Preview Section */}
-        <div className="bg-zinc-900 rounded-2xl shadow-sm border border-zinc-800 p-8 flex flex-col items-center justify-center text-center">
+        <div className="bg-slate-900 rounded-2xl shadow-sm border border-slate-800 p-8 flex flex-col items-center justify-center text-center">
           {appState.qrCodeDataUrl ? (
             <div className="animate-in zoom-in-95 duration-300 w-full flex flex-col items-center">
               <h3 className="text-xl font-bold text-white mb-6">Live Preview</h3>
               
-              <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 shadow-sm mb-8">
+              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 shadow-sm mb-8">
                 <img 
                   src={appState.qrCodeDataUrl} 
                   alt="Generated QR Code" 
@@ -215,20 +215,20 @@ export function QRGenerator({ appState, setAppState, onNavigate }: QRGeneratorPr
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                 <button
                   onClick={handleDownload}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 text-zinc-300 rounded-lg text-sm font-medium transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-medium transition-colors"
                 >
                   <Download className="h-4 w-4" /> Download QR
                 </button>
                 <button
                   onClick={() => onNavigate('design')}
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold shadow-sm transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold shadow-sm transition-colors"
                 >
                   <ImageIcon className="h-4 w-4" /> Use on Design
                 </button>
               </div>
             </div>
           ) : (
-            <div className="text-zinc-500 flex flex-col items-center gap-4">
+            <div className="text-slate-500 flex flex-col items-center gap-4">
               <p>Enter a valid WhatsApp link to see the preview</p>
             </div>
           )}
