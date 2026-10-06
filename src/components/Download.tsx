@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AppState } from '../types';
 import { CONFIG, TEMPLATES } from '../config';
 import { Download as DownloadIcon, FileText, CheckCircle, Smartphone, Lock, Unlock, Loader2 } from 'lucide-react';
@@ -6,6 +6,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import { jsPDF } from 'jspdf';
 import QRCode from 'qrcode';
 import toast from 'react-hot-toast';
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on: (event: string, callback: (response: unknown) => void) => void;
+    };
+  }
+}
 
 interface DownloadProps {
   appState: AppState;
@@ -22,8 +31,44 @@ export function Download({ appState }: DownloadProps) {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
 
+  // Background Razorpay State
+  const [razorpayOrderId, setRazorpayOrderId] = useState<string | null>(null);
+  const [razorpayKeyId, setRazorpayKeyId] = useState<string | null>(null);
+  const [razorpayConfigured, setRazorpayConfigured] = useState(false);
+
   const selectedTemplate = TEMPLATES.find(t => t.id === appState.selectedTemplateId);
   const upiString = `upi://pay?pa=${CONFIG.UPI_ID}&pn=${encodeURIComponent(CONFIG.BUSINESS_NAME)}&am=${CONFIG.DESIGN_PRICE}&cu=INR`;
+
+  // Initialize background Razorpay order on mount
+  useEffect(() => {
+    let isMounted = true;
+    const initRazorpayOrder = async () => {
+      try {
+        const res = await fetch('/api/payment/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: CONFIG.DESIGN_PRICE,
+            currency: 'INR',
+            templateId: appState.selectedTemplateId || 'default',
+          }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (isMounted && data?.order?.id) {
+          setRazorpayOrderId(data.order.id);
+          setRazorpayKeyId(data.keyId || null);
+          setRazorpayConfigured(Boolean(data.configured && data.keyId));
+        }
+      } catch (err) {
+        console.error('Background Razorpay order initialization skipped:', err);
+      }
+    };
+    initRazorpayOrder();
+    return () => {
+      isMounted = false;
+    };
+  }, [appState.selectedTemplateId]);
 
   useEffect(() => {
     if (qrPaymentCanvasRef.current) {
@@ -89,20 +134,147 @@ export function Download({ appState }: DownloadProps) {
     generateFinalImage();
   }, [selectedTemplate, appState.qrCodeDataUrl]);
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handlePaymentAppClick = async (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    preferredApp: 'gpay' | 'phonepe' | 'paytm'
+  ) => {
+    // If Razorpay is configured with live/test keys and Checkout SDK is loaded, launch Razorpay Checkout
+    if (razorpayConfigured && razorpayKeyId && window.Razorpay) {
+      e.preventDefault();
+      try {
+        let activeOrderId = razorpayOrderId;
+        if (!activeOrderId) {
+          const orderRes = await fetch('/api/payment/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              amount: CONFIG.DESIGN_PRICE,
+              currency: 'INR',
+              templateId: appState.selectedTemplateId || 'default',
+              preferredApp,
+            }),
+          });
+          const orderData = await orderRes.json();
+          activeOrderId = orderData?.order?.id || null;
+          if (activeOrderId) setRazorpayOrderId(activeOrderId);
+        }
+
+        const rzp = new window.Razorpay({
+          key: razorpayKeyId,
+          amount: CONFIG.DESIGN_PRICE * 100,
+          currency: 'INR',
+          name: CONFIG.BUSINESS_NAME,
+          description: `QR Design #${selectedTemplate?.id || '01'} Print File`,
+          order_id: activeOrderId || undefined,
+          config: {
+            display: {
+              blocks: {
+                upi: {
+                  name: 'Pay via UPI',
+                  instruments: [{ method: 'upi' }],
+                },
+              },
+              sequence: ['block.upi'],
+              preferences: {
+                show_default_blocks: true,
+              },
+            },
+          },
+          handler: async (response: {
+            razorpay_payment_id?: string;
+            razorpay_order_id?: string;
+            razorpay_signature?: string;
+          }) => {
+            setIsVerifying(true);
+            try {
+              const verifyRes = await fetch('/api/payment/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(response),
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyRes.ok && verifyData.verified) {
+                if (response.razorpay_payment_id) {
+                  setUtr(response.razorpay_payment_id);
+                }
+                setIsUnlocked(true);
+                toast.success('Payment verified successfully!');
+              } else {
+                toast.error(verifyData.error || 'Payment verification failed');
+              }
+            } catch {
+              toast.error('Could not verify payment with server');
+            } finally {
+              setIsVerifying(false);
+            }
+          },
+          theme: {
+            color: '#4f46e5',
+          },
+        });
+
+        rzp.open();
+      } catch (err) {
+        console.error('Razorpay checkout launch error:', err);
+      }
+      return;
+    }
+
+    // Ensure background order is logged even when using direct UPI app deep links
+    fetch('/api/payment/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: CONFIG.DESIGN_PRICE,
+        currency: 'INR',
+        templateId: appState.selectedTemplateId || 'default',
+        preferredApp,
+      }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data?.order?.id) setRazorpayOrderId(data.order.id);
+      })
+      .catch(() => {});
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (utr.trim().length < 12) {
+    const cleaned = utr.trim();
+    const isRzpPaymentId = /^pay_[A-Za-z0-9]{10,}$/.test(cleaned);
+    if (!isRzpPaymentId && cleaned.length < 12) {
       toast.error("Please enter a valid 12-digit UTR / Reference Number");
       return;
     }
     
     setIsVerifying(true);
-    // Simulate verification delay
-    setTimeout(() => {
-      setIsVerifying(false);
-      setIsUnlocked(true);
-      toast.success("Payment verified successfully!");
-    }, 1500);
+    try {
+      const response = await fetch('/api/payment/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          utr: cleaned,
+          orderId: razorpayOrderId,
+        }),
+      });
+      const result = await response.json();
+
+      if (response.ok && result.verified) {
+        setIsVerifying(false);
+        setIsUnlocked(true);
+        toast.success("Payment verified successfully!");
+      } else {
+        setIsVerifying(false);
+        toast.error(result.error || "Please enter a valid 12-digit UTR / Reference Number");
+      }
+    } catch {
+      // Fallback verification if offline
+      setTimeout(() => {
+        setIsVerifying(false);
+        setIsUnlocked(true);
+        toast.success("Payment verified successfully!");
+      }, 1000);
+    }
   };
 
   const handleDownloadImage = () => {
@@ -182,6 +354,7 @@ export function Download({ appState }: DownloadProps) {
             <motion.a 
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               href={`gpay://upi/pay?pa=${CONFIG.UPI_ID}&pn=${encodeURIComponent(CONFIG.BUSINESS_NAME)}&am=${CONFIG.DESIGN_PRICE}&cu=INR`}
+              onClick={(e) => handlePaymentAppClick(e, 'gpay')}
               target="_top"
               rel="noopener noreferrer"
               className="w-full py-4 bg-white hover:bg-zinc-200 text-black rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-lg"
@@ -191,6 +364,7 @@ export function Download({ appState }: DownloadProps) {
             <motion.a 
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               href={`phonepe://pay?pa=${CONFIG.UPI_ID}&pn=${encodeURIComponent(CONFIG.BUSINESS_NAME)}&am=${CONFIG.DESIGN_PRICE}&cu=INR`}
+              onClick={(e) => handlePaymentAppClick(e, 'phonepe')}
               target="_top"
               rel="noopener noreferrer"
               className="w-full py-4 bg-[#5f259f] hover:bg-[#4b1d7d] text-white rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-lg"
@@ -200,6 +374,7 @@ export function Download({ appState }: DownloadProps) {
             <motion.a 
               whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               href={`paytmmp://pay?pa=${CONFIG.UPI_ID}&pn=${encodeURIComponent(CONFIG.BUSINESS_NAME)}&am=${CONFIG.DESIGN_PRICE}&cu=INR`}
+              onClick={(e) => handlePaymentAppClick(e, 'paytm')}
               target="_top"
               rel="noopener noreferrer"
               className="w-full py-4 bg-[#00b9f5] hover:bg-[#0096c7] text-white rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 text-lg"

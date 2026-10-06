@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AppState, Step } from '../types';
 import { TEMPLATES, CONFIG } from '../config';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
@@ -6,7 +6,7 @@ import { motion } from 'motion/react';
 
 interface LivePreviewProps {
   appState: AppState;
-  setAppState: React.Dispatch<React.SetStateAction<AppState>>;
+  setAppState?: React.Dispatch<React.SetStateAction<AppState>>;
   onNavigate: (step: Step) => void;
 }
 

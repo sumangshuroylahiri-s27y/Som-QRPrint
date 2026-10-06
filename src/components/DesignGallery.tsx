@@ -1,3 +1,4 @@
+import React from 'react';
 import { AppState, Step } from '../types';
 import { TEMPLATES, CONFIG } from '../config';
 import { Check } from 'lucide-react';

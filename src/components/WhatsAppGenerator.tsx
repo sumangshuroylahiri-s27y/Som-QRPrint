@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { AppState, Step } from '../types';
 import { ArrowRight, Copy, ExternalLink, QrCode } from 'lucide-react';
 import toast from 'react-hot-toast';
